@@ -37,7 +37,7 @@ export default function Footer() {
         </nav>
 
         <p className="text-[11px] uppercase tracking-[0.16em] text-silver-dim">
-          © {new Date().getFullYear()} Whitaker · Inteligência Financeira
+          © {new Date().getFullYear()} Whitaker · Inteligência de Milhas
         </p>
       </div>
     </footer>

@@ -6,12 +6,12 @@ import CountUp from '../components/CountUp'
 const Globe = lazy(() => import('../components/Globe'))
 
 const TERMINAL_LINES = [
-  { t: '> conectando ao dispositivo via MCP...', c: 'text-silver-dim' },
-  { t: '✓ 1.482 operações monitoradas em tempo real', c: 'text-gold-bright' },
-  { t: '⚠ cobrança recorrente de R$ 289,90 em 48h', c: 'text-gold' },
-  { t: '➜ aviso prévio enviado · 2 dias de antecedência', c: 'text-silver' },
-  { t: '⚠ transação fora do padrão detectada', c: 'text-gold' },
-  { t: '✓ você está no controle de tudo', c: 'text-gold-bright' },
+  { t: '> conectando ao mercado de milhas...', c: 'text-silver-dim' },
+  { t: '✓ 38.402 ofertas monitoradas em tempo real', c: 'text-gold-bright' },
+  { t: '⚠ passagem GRU → LIS por 78k pontos · -64%', c: 'text-gold' },
+  { t: '➜ oportunidade enviada · antes de esgotar', c: 'text-silver' },
+  { t: '⚠ diária de carro 40% abaixo da média', c: 'text-gold' },
+  { t: '✓ gift card com bônus de 30% detectado', c: 'text-gold-bright' },
 ]
 
 function Terminal() {
@@ -92,7 +92,7 @@ export default function Hero() {
           >
             <span className="h-1.5 w-1.5 animate-pulseGlow rounded-full bg-gold-bright" />
             <span className="text-[11px] uppercase tracking-[0.22em] text-silver-dim">
-              Conectado ao seu celular · via MCP
+              Monitoramento 24/7 do mercado de milhas
             </span>
           </motion.div>
 
@@ -103,8 +103,8 @@ export default function Hero() {
             className="font-display text-4xl font-medium leading-[1.05] tracking-tightest text-balance text-silver sm:text-5xl lg:text-6xl"
           >
             A Inteligência Artificial que{' '}
-            <span className="text-gold-gradient">Avisa Você Antes</span>{' '}
-            de Cada Operação Acontecer.
+            <span className="text-gold-gradient">Encontra a Oportunidade</span>{' '}
+            Antes de Todo Mundo.
           </motion.h1>
 
           <motion.p
@@ -113,10 +113,10 @@ export default function Hero() {
             transition={{ duration: 1, delay: 0.6 }}
             className="mt-7 max-w-xl text-base leading-relaxed text-silver-dim sm:text-lg"
           >
-            O Whitaker é um MCP que se conecta ao seu celular, monitora tudo em
-            tempo real e envia avisos prévios sobre cada cobrança, transação e
-            movimentação — antes que ela aconteça. Você sempre um passo à frente
-            do seu dinheiro.
+            O Whitaker monitora o mercado de milhas em tempo real — passagens à
+            venda, carros, locações e gift cards — e te avisa no momento exato em
+            que surge uma oportunidade que vale a pena. Você sempre um passo à
+            frente do mercado.
           </motion.p>
 
           <motion.div
@@ -144,19 +144,19 @@ export default function Hero() {
           >
             <div>
               <p className="font-display text-2xl text-silver">
-                <CountUp value={48} suffix="h" />
+                <CountUp value={64} suffix="%" />
               </p>
               <p className="text-[11px] uppercase tracking-[0.16em] text-silver-dim">
-                antecedência média
+                economia média
               </p>
             </div>
             <div className="h-10 w-px bg-white/10" />
             <div>
               <p className="font-display text-2xl text-silver">
-                <CountUp value={1.4} decimals={1} suffix="M" />
+                <CountUp value={38.4} decimals={1} suffix="k" />
               </p>
               <p className="text-[11px] uppercase tracking-[0.16em] text-silver-dim">
-                operações monitoradas
+                ofertas monitoradas
               </p>
             </div>
             <div className="h-10 w-px bg-white/10" />
@@ -183,13 +183,13 @@ export default function Hero() {
 
           <FloatingStat
             className="right-0 top-6"
-            label="avisos prévios hoje"
-            value={47}
+            label="oportunidades hoje"
+            value={312}
           />
           <FloatingStat
             className="right-6 bottom-16"
-            label="valor protegido"
-            value={12.8}
+            label="economia possível hoje"
+            value={9.4}
             prefix="R$ "
             suffix="k"
             decimals={1}

@@ -3,47 +3,47 @@ import Reveal from '../components/Reveal'
 
 const ALERTS = [
   {
-    tone: 'warn',
-    title: 'Cobrança recorrente',
-    sub: 'Netflix · R$ 55,90',
-    when: 'em 2 dias',
+    tone: 'alert',
+    title: 'Passagem à venda',
+    sub: 'GRU → Lisboa · 78k pontos',
+    when: '-64%',
     icon: (
-      <path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+      <path d="M17.8 19.2 16 11l3.5-3.5a2.1 2.1 0 0 0-3-3L13 8 4.8 6.2a.5.5 0 0 0-.5.8l3.9 4-2.4 2.4-1.9-.5a.5.5 0 0 0-.5.8L6 17.5l2.3 2.7a.5.5 0 0 0 .8-.5l-.5-1.9 2.4-2.4 4 3.9a.5.5 0 0 0 .8-.5Z" />
     ),
   },
   {
     tone: 'info',
-    title: 'Fatura fecha amanhã',
-    sub: 'Cartão final 4291 · revise 3 lançamentos',
-    when: 'amanhã',
+    title: 'Diária de carro',
+    sub: 'Orlando · 40% abaixo da média',
+    when: 'hoje',
     icon: (
       <>
-        <rect x="2" y="5" width="20" height="14" rx="2" />
-        <path d="M2 10h20" />
+        <path d="M5 13 6.5 8.5A2 2 0 0 1 8.4 7h7.2a2 2 0 0 1 1.9 1.4L19 13v5a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H8v1a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1Z" />
+        <path d="M5 13h14M7.5 16h.01M16.5 16h.01" />
       </>
     ),
   },
   {
-    tone: 'alert',
-    title: 'Transação fora do padrão',
-    sub: 'R$ 1.249,00 · compra online',
+    tone: 'info',
+    title: 'Locação com desconto',
+    sub: 'SUV 7 dias · -35%',
+    when: 'em 2 dias',
+    icon: (
+      <>
+        <rect x="3" y="7" width="18" height="12" rx="2" />
+        <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+      </>
+    ),
+  },
+  {
+    tone: 'warn',
+    title: 'Gift card com bônus',
+    sub: 'Bônus de 30% na compra',
     when: 'agora',
     icon: (
       <>
-        <path d="M12 2 4 5v6c0 5 3.5 8.5 8 11 4.5-2.5 8-6 8-11V5l-8-3Z" />
-        <path d="M12 8v4m0 4h.01" />
-      </>
-    ),
-  },
-  {
-    tone: 'info',
-    title: 'Assinatura vai subir de preço',
-    sub: 'Spotify · +R$ 5,00 no próximo ciclo',
-    when: 'em 5 dias',
-    icon: (
-      <>
-        <circle cx="12" cy="12" r="9" />
-        <path d="M12 7v5l3 2" />
+        <rect x="3" y="8" width="18" height="13" rx="2" />
+        <path d="M3 12h18M12 8v13M12 8S10.5 4 8 4a2 2 0 0 0 0 4M12 8s1.5-4 4-4a2 2 0 0 1 0 4" />
       </>
     ),
   },
@@ -75,7 +75,7 @@ function PhoneMockup() {
           </div>
 
           <p className="mb-3 px-1 text-[11px] uppercase tracking-[0.18em] text-silver-dim">
-            Avisos prévios
+            Oportunidades agora
           </p>
 
           <div className="space-y-3">
@@ -126,7 +126,7 @@ function PhoneMockup() {
 
           <div className="mt-auto pt-4">
             <div className="rounded-2xl bg-gold-gradient px-4 py-3 text-center text-[12px] font-medium text-ink-900">
-              Tudo sob controle
+              Não perca nenhuma
             </div>
           </div>
         </div>
@@ -148,26 +148,26 @@ export default function Status() {
         <div>
           <Reveal>
             <p className="mb-6 text-[12px] uppercase tracking-widest2 text-gold">
-              — Controle —
+              — Oportunidades —
             </p>
           </Reveal>
           <Reveal delay={0.1}>
             <h2 className="font-display text-4xl font-medium leading-[1.1] tracking-tightest text-balance text-silver sm:text-5xl lg:text-6xl">
-              O verdadeiro controle não é{' '}
-              <span className="text-silver-dim">gastar menos.</span>
+              O verdadeiro luxo não é{' '}
+              <span className="text-silver-dim">gastar mais.</span>
             </h2>
           </Reveal>
           <Reveal delay={0.2}>
             <p className="mt-6 font-display text-3xl italic text-gold-gradient sm:text-4xl">
-              É saber de cada operação antes que ela aconteça.
+              É saber utilizar melhor cada oportunidade.
             </p>
           </Reveal>
           <Reveal delay={0.3}>
             <div className="mt-10 flex flex-wrap gap-x-10 gap-y-4">
               {[
-                'Avisos prévios em tempo real',
-                'Zero surpresas na fatura',
-                'Sempre um passo à frente',
+                'Passagens e milhas à venda',
+                'Carros e locações',
+                'Gift cards com bônus',
               ].map((item) => (
                 <span
                   key={item}

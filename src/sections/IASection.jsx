@@ -4,14 +4,14 @@ import TiltCard from '../components/TiltCard'
 const CARDS = [
   {
     title: 'Monitoramento Contínuo',
-    desc: 'Conectado ao seu celular, o Whitaker observa cada operação financeira 24 horas por dia, sem interrupção.',
+    desc: 'O Whitaker varre o mercado de milhas, passagens, carros, locações e gift cards 24 horas por dia, sem parar.',
     icon: (
       <path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0Zm9-5v5l3 2" />
     ),
   },
   {
-    title: 'Avisos Prévios',
-    desc: 'Você é alertado antes de cada cobrança, transação ou movimentação acontecer — com horas ou dias de antecedência.',
+    title: 'Oportunidades em Tempo Real',
+    desc: 'Você é avisado no instante em que surge uma passagem, diária, locação ou gift abaixo do preço de mercado.',
     icon: (
       <>
         <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
@@ -20,8 +20,8 @@ const CARDS = [
     ),
   },
   {
-    title: 'Controle Financeiro Inteligente',
-    desc: 'Faturas, cartões e assinaturas organizados e sob seu controle, com leitura clara de para onde vai cada real.',
+    title: 'Curadoria Inteligente',
+    desc: 'A IA filtra o ruído e entrega só as ofertas que realmente valem a pena para o seu perfil e seus objetivos.',
     icon: (
       <>
         <path d="M3 13h4l3 7 4-16 3 9h4" />
@@ -29,12 +29,11 @@ const CARDS = [
     ),
   },
   {
-    title: 'Proteção e Antecipação',
-    desc: 'Transações fora do padrão são detectadas na hora e você decide antes que o dinheiro saia da sua conta.',
+    title: 'Vantagem Antecipada',
+    desc: 'As melhores oportunidades duram pouco. O Whitaker te coloca na frente, antes que a multidão chegue.',
     icon: (
       <>
-        <path d="M12 2 4 5v6c0 5 3.5 8.5 8 11 4.5-2.5 8-6 8-11V5l-8-3Z" />
-        <path d="m9 12 2 2 4-4" />
+        <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z" />
       </>
     ),
   },

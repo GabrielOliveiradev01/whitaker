@@ -20,7 +20,7 @@ export default function FinalCTA() {
 
         <Reveal delay={0.1}>
           <h2 className="mx-auto max-w-4xl font-display text-4xl font-medium leading-[1.08] tracking-tightest text-balance text-silver sm:text-6xl lg:text-7xl">
-            O Futuro do Controle Financeiro{' '}
+            O Futuro das Milhas{' '}
             <span className="text-gold-gradient">Já Existe.</span>
           </h2>
         </Reveal>

@@ -43,9 +43,9 @@ export default function Exclusividade() {
 
         <Reveal delay={0.25}>
           <p className="mx-auto mt-10 max-w-2xl text-lg leading-relaxed text-silver-dim">
-            O Whitaker foi desenvolvido para quem exige controle total e
-            antecipação sobre cada operação financeira — pessoas que não aceitam
-            ser surpreendidas pelo próprio dinheiro.
+            O Whitaker foi desenvolvido para quem quer estar sempre à frente no
+            mercado de milhas — encontrando passagens, carros, locações e gift
+            cards antes de todo mundo.
           </p>
         </Reveal>
 

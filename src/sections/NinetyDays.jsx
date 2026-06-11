@@ -33,8 +33,8 @@ export default function NinetyDays() {
 
           <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-silver-dim">
             Ative seu acesso gratuito e descubra por que nossa Inteligência
-            Artificial está mudando a forma como as pessoas controlam o próprio
-            dinheiro.
+            Artificial está mudando a forma como as pessoas encontram as
+            melhores oportunidades de milhas.
           </p>
 
           <div className="mt-10 flex justify-center">
