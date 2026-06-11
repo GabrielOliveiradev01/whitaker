@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
+import { waLink } from '../lib/contact'
 
 const links = [
   { label: 'Plataforma', href: '#plataforma' },
@@ -68,7 +69,9 @@ export default function Nav() {
         </nav>
 
         <a
-          href="#acesso"
+          href={waLink()}
+          target="_blank"
+          rel="noopener noreferrer"
           className="hidden rounded-full border border-gold/40 px-5 py-2 text-[13px] uppercase tracking-[0.16em] text-gold-bright transition-all hover:bg-gold/10 sm:inline-block"
         >
           Solicitar Convite

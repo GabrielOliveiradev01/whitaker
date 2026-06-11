@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import Reveal from '../components/Reveal'
 import Wordmark from '../components/Wordmark'
+import { waLink } from '../lib/contact'
 
 function GooglePlayIcon({ className = '' }) {
   return (
@@ -18,6 +19,8 @@ function StoreButton({ href = '#', store = 'android' }) {
   return (
     <a
       href={href}
+      target="_blank"
+      rel="noopener noreferrer"
       className="group relative inline-flex items-center gap-3 overflow-hidden rounded-2xl border border-gold/45 bg-white/[0.02] px-6 py-3.5 transition-all duration-500 hover:border-gold hover:bg-gold/[0.06] hover:-translate-y-0.5"
     >
       <span
@@ -104,7 +107,10 @@ export default function Download() {
 
           <Reveal delay={0.3}>
             <div className="mt-10 flex flex-wrap justify-center gap-4 lg:justify-start">
-              <StoreButton store="android" href="#" />
+              <StoreButton
+                store="android"
+                href={waLink('Olá! Quero baixar o aplicativo Whitaker para Android.')}
+              />
             </div>
           </Reveal>
         </div>

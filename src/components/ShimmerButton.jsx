@@ -6,7 +6,11 @@ export default function ShimmerButton({
   href = '#',
   className = '',
   onClick,
+  external = false,
 }) {
+  const externalProps = external
+    ? { target: '_blank', rel: 'noopener noreferrer' }
+    : {}
   const base =
     'group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full px-8 py-4 text-sm font-medium tracking-wide transition-all duration-500 will-change-transform'
 
@@ -16,7 +20,12 @@ export default function ShimmerButton({
       : 'glass text-silver hover:border-gold/50 hover:text-gold-bright hover:-translate-y-0.5'
 
   return (
-    <a href={href} onClick={onClick} className={`${base} ${styles} ${className}`}>
+    <a
+      href={href}
+      onClick={onClick}
+      {...externalProps}
+      className={`${base} ${styles} ${className}`}
+    >
       {/* light sweep */}
       <span
         aria-hidden

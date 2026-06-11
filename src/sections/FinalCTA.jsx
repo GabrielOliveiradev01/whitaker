@@ -1,6 +1,7 @@
 import Reveal from '../components/Reveal'
 import ShimmerButton from '../components/ShimmerButton'
 import GoldParticles from '../components/GoldParticles'
+import { waLink } from '../lib/contact'
 
 export default function FinalCTA() {
   return (
@@ -27,7 +28,12 @@ export default function FinalCTA() {
 
         <Reveal delay={0.3}>
           <div className="mt-12 flex justify-center">
-            <ShimmerButton href="#" variant="gold" className="px-12 py-5 text-base">
+            <ShimmerButton
+              href={waLink('Olá! Quero solicitar acesso ao aplicativo Whitaker.')}
+              external
+              variant="gold"
+              className="px-12 py-5 text-base"
+            >
               Solicitar Acesso
             </ShimmerButton>
           </div>

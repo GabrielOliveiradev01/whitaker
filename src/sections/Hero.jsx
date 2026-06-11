@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import ShimmerButton from '../components/ShimmerButton'
 import CountUp from '../components/CountUp'
+import { waLink } from '../lib/contact'
 
 const Globe = lazy(() => import('../components/Globe'))
 
@@ -125,7 +126,11 @@ export default function Hero() {
             transition={{ duration: 1, delay: 0.8 }}
             className="mt-10 flex flex-col gap-4 sm:flex-row"
           >
-            <ShimmerButton href="#acesso" variant="gold">
+            <ShimmerButton
+              href={waLink('Olá! Quero solicitar um convite para o aplicativo Whitaker.')}
+              external
+              variant="gold"
+            >
               Solicitar Convite
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />

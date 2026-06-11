@@ -2,6 +2,7 @@ import Reveal from '../components/Reveal'
 import CountUp from '../components/CountUp'
 import ShimmerButton from '../components/ShimmerButton'
 import GoldParticles from '../components/GoldParticles'
+import { waLink } from '../lib/contact'
 
 export default function NinetyDays() {
   return (
@@ -38,7 +39,12 @@ export default function NinetyDays() {
           </p>
 
           <div className="mt-10 flex justify-center">
-            <ShimmerButton href="#acesso" variant="gold" className="px-10 py-4 text-base">
+            <ShimmerButton
+              href={waLink('Olá! Quero ativar meus 90 dias gratuitos no aplicativo Whitaker.')}
+              external
+              variant="gold"
+              className="px-10 py-4 text-base"
+            >
               Começar Agora
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
