@@ -1,4 +1,5 @@
 import { Viewer } from '@photo-sphere-viewer/core';
+import { EquirectangularTilesAdapter } from '@photo-sphere-viewer/equirectangular-tiles-adapter';
 import { VirtualTourPlugin } from '@photo-sphere-viewer/virtual-tour-plugin';
 import { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
 import { AutorotatePlugin } from '@photo-sphere-viewer/autorotate-plugin';
@@ -14,6 +15,32 @@ import { placeholderPanorama } from './placeholder.js';
 const DEBUG = new URLSearchParams(location.search).has('debug');
 const deg = (v) => `${v}deg`;
 const roomById = new Map(rooms.map((r) => [r.id, r]));
+
+// Panorama em tiles (gerados por scripts/make-tiles.py): uma prévia leve
+// aparece na hora e os blocos em resolução total carregam conforme a vista.
+// O nível 0 (1024 px) nunca é escolhido na prática, então o visualizador
+// sempre usa a resolução máxima, com mipmaps (sem serrilhado ao afastar).
+function tiledPanorama({ dir, width }) {
+  return {
+    baseUrl: `${dir}/base.jpg`,
+    levels: [
+      { width: 1024, cols: 2, rows: 1 },
+      { width, cols: width / 512, rows: width / 1024 },
+    ],
+    tileUrl: (col, row, level) => `${dir}/${level}/${col}_${row}.jpg`,
+  };
+}
+
+// Ambiente ainda sem foto: só a imagem provisória, sem tiles.
+function placeholderTiles(room, i) {
+  return {
+    baseUrl: placeholderPanorama(room.name, (i * 47 + 25) % 360),
+    width: 4096,
+    cols: 8,
+    rows: 4,
+    tileUrl: () => null,
+  };
+}
 
 function arrowElement(link) {
   const target = roomById.get(link.nodeId);
@@ -31,7 +58,7 @@ const nodes = rooms.map((room, i) => ({
   name: room.name,
   caption: room.name,
   description: room.description,
-  panorama: room.panorama || placeholderPanorama(room.name, (i * 47 + 25) % 360),
+  panorama: room.tiles ? tiledPanorama(room.tiles) : placeholderTiles(room, i),
   thumbnail: room.thumbnail || undefined,
   links: room.links
     .filter((l) => roomById.has(l.to))
@@ -68,6 +95,7 @@ if (property.contact?.href) {
 
 const viewer = new Viewer({
   container: document.querySelector('#viewer'),
+  adapter: EquirectangularTilesAdapter.withConfig({ baseBlur: false, antialias: true }),
   navbar: false,
   // Em tela vertical (celular) abre mais aberto para mostrar mais do ambiente.
   defaultZoomLvl: window.innerWidth < window.innerHeight ? 0 : 30,

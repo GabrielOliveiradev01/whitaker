@@ -1,6 +1,8 @@
-Coloque aqui as fotos 360° (equirretangulares, proporção 2:1, ex.: 6000×3000),
-uma por ambiente, e aponte o caminho em `src/tour.config.js`:
+Coloque aqui as fotos 360° originais (equirretangulares, proporção 2:1,
+ex.: 8192×4096), uma por ambiente, e gere os tiles:
 
-    panorama: 'panoramas/sala.jpg'
+    python3 scripts/make-tiles.py public/panoramas/<foto>.jpg <id-do-ambiente>
 
-Dica: JPG com qualidade ~80 e até 8000 px de largura carrega bem no celular.
+Depois aponte no ambiente, em `src/tour.config.js`:
+
+    tiles: { dir: 'tiles/<id-do-ambiente>', width: 8192 },

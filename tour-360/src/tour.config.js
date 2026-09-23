@@ -1,12 +1,14 @@
 /**
  * Configuração do tour 360°.
  *
- * Para cada ambiente, coloque a foto equirretangular (proporção 2:1) em
- * `public/panoramas/` e preencha `panorama` com o caminho, ex.:
- *   panorama: 'panoramas/sala.jpg'
+ * Para cada ambiente, coloque a foto equirretangular original (proporção 2:1)
+ * em `public/panoramas/` e gere os tiles:
+ *   python3 scripts/make-tiles.py public/panoramas/<foto>.jpg <id>
+ * Depois preencha `tiles` no ambiente, ex.:
+ *   tiles: { dir: 'tiles/elevador', width: 8192 },
  *
- * Enquanto `panorama` estiver vazio, o tour gera uma imagem provisória com
- * grade de graus — útil para posicionar os pontos de navegação.
+ * Enquanto `tiles` não estiver definido, o tour gera uma imagem provisória
+ * com grade de graus — útil para posicionar os pontos de navegação.
  *
  * Posições usam graus: `yaw` = horizontal (0° = centro da foto, cresce para a
  * direita), `pitch` = vertical (0° = horizonte, negativo = para baixo).
@@ -29,7 +31,7 @@ export const rooms = [
     id: 'lobby',
     name: 'Lobby',
     description: 'Hall de entrada com pé-direito duplo, mármore e recepção 24h.',
-    panorama: 'panoramas/IncorApp_Lobby_360_8192x4096.jpg',
+    tiles: { dir: 'tiles/lobby', width: 8192 },
     thumbnail: 'panoramas/lobby-thumb.jpg',
     initialView: { yaw: 0, pitch: 0 },
     links: [{ to: 'elevador', yaw: 35, pitch: -4 }],
@@ -39,7 +41,6 @@ export const rooms = [
     id: 'elevador',
     name: 'Elevador',
     description: 'Hall dos elevadores.',
-    panorama: '',
     initialView: { yaw: 0, pitch: 0 },
     links: [{ to: 'lobby', yaw: 180, pitch: -8 }],
     info: [],
