@@ -1,0 +1,22 @@
+{
+  "name": "apartamento-tour-360",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@photo-sphere-viewer/autorotate-plugin": "5.15.1",
+    "@photo-sphere-viewer/core": "5.15.1",
+    "@photo-sphere-viewer/gyroscope-plugin": "5.15.1",
+    "@photo-sphere-viewer/markers-plugin": "5.15.1",
+    "@photo-sphere-viewer/virtual-tour-plugin": "5.15.1",
+    "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "vite": "^5.4.8"
+  }
+}
