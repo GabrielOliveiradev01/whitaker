@@ -16,7 +16,7 @@ npm run build    # gera dist/
 - Transição suave (fade) entre ambientes, com pré-carregamento
 - Rotação automática após alguns segundos parado
 - Giroscópio no celular (mover o aparelho para olhar em volta)
-- Zoom, tela cheia e link direto para um ambiente (`/#rooftop`)
+- Zoom, tela cheia e link direto para um ambiente (`/#elevador`)
 - Pontos de informação opcionais (ícone "i" com texto)
 - Imagem provisória com grade de graus enquanto a foto real não chega
 
