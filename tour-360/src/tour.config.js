@@ -3,7 +3,7 @@
  *
  * Para cada ambiente, coloque a foto equirretangular (proporção 2:1) em
  * `public/panoramas/` e preencha `panorama` com o caminho, ex.:
- *   panorama: '/panoramas/sala.jpg'
+ *   panorama: 'panoramas/sala.jpg'
  *
  * Enquanto `panorama` estiver vazio, o tour gera uma imagem provisória com
  * grade de graus — útil para posicionar os pontos de navegação.
@@ -29,8 +29,8 @@ export const rooms = [
     id: 'lobby',
     name: 'Lobby',
     description: 'Hall de entrada com pé-direito duplo, mármore e recepção 24h.',
-    panorama: '/panoramas/lobby.jpg',
-    thumbnail: '/panoramas/lobby-thumb.jpg',
+    panorama: 'panoramas/lobby.jpg',
+    thumbnail: 'panoramas/lobby-thumb.jpg',
     initialView: { yaw: 0, pitch: 0 },
     links: [{ to: 'sala', yaw: 35, pitch: -4 }],
     info: [{ yaw: 0, pitch: -12, title: 'Recepção', text: 'Concierge e atendimento aos moradores.' }],

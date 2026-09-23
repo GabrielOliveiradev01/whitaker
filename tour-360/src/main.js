@@ -69,7 +69,8 @@ if (property.contact?.href) {
 const viewer = new Viewer({
   container: document.querySelector('#viewer'),
   navbar: false,
-  defaultZoomLvl: 30,
+  // Em tela vertical (celular) abre mais aberto para mostrar mais do ambiente.
+  defaultZoomLvl: window.innerWidth < window.innerHeight ? 0 : 30,
   loadingTxt: '',
   touchmoveTwoFingers: false,
   mousewheelCtrlKey: false,
@@ -162,7 +163,13 @@ document.querySelector('[data-action="zoom-in"]').addEventListener('click', () =
 document.querySelector('[data-action="zoom-out"]').addEventListener('click', () => viewer.zoomOut(15));
 
 const btnFull = document.querySelector('[data-action="fullscreen"]');
-btnFull.addEventListener('click', () => viewer.toggleFullscreen());
+btnFull.addEventListener('click', () => {
+  try {
+    viewer.toggleFullscreen();
+  } catch {
+    // Tela cheia indisponível (ex.: dentro de iframe no celular).
+  }
+});
 viewer.addEventListener('fullscreen', ({ fullscreenEnabled }) => {
   btnFull.classList.toggle('is-on', fullscreenEnabled);
 });
