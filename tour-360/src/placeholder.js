@@ -53,7 +53,7 @@ export function placeholderPanorama(label, hue = 30) {
   ctx.stroke();
 
   ctx.fillStyle = 'rgba(255,255,255,0.9)';
-  ctx.font = '300 110px Georgia, serif';
+  ctx.font = '300 110px Poppins, system-ui, sans-serif';
   for (const yaw of [0, 90, 180, -90]) {
     const x = ((yaw + 180) / 360) * w;
     ctx.fillText(label, x, h / 2 - 180);

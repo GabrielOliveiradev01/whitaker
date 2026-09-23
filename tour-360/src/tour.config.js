@@ -13,7 +13,7 @@
  * Abra o tour com `?debug` na URL e clique na imagem para ler yaw/pitch.
  */
 export const property = {
-  name: 'The Residences',
+  name: 'Incorapp',
   subtitle: 'Tour virtual 360°',
   address: '',
   contact: {
