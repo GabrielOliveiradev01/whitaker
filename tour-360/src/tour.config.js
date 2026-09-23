@@ -29,7 +29,7 @@ export const rooms = [
     id: 'lobby',
     name: 'Lobby',
     description: 'Hall de entrada com pé-direito duplo, mármore e recepção 24h.',
-    panorama: 'panoramas/lobby.jpg',
+    panorama: 'panoramas/IncorApp_Lobby_360_8192x4096.jpg',
     thumbnail: 'panoramas/lobby-thumb.jpg',
     initialView: { yaw: 0, pitch: 0 },
     links: [{ to: 'sala', yaw: 35, pitch: -4 }],
