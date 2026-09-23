@@ -13,7 +13,7 @@
  * Abra o tour com `?debug` na URL e clique na imagem para ler yaw/pitch.
  */
 export const property = {
-  name: 'Apartamento Rooftop',
+  name: 'The Residences',
   subtitle: 'Tour virtual 360°',
   address: '',
   contact: {
@@ -22,9 +22,19 @@ export const property = {
   },
 };
 
-export const startRoom = 'sala';
+export const startRoom = 'lobby';
 
 export const rooms = [
+  {
+    id: 'lobby',
+    name: 'Lobby',
+    description: 'Hall de entrada com pé-direito duplo, mármore e recepção 24h.',
+    panorama: '/panoramas/lobby.jpg',
+    thumbnail: '/panoramas/lobby-thumb.jpg',
+    initialView: { yaw: 0, pitch: 0 },
+    links: [{ to: 'sala', yaw: 35, pitch: -4 }],
+    info: [{ yaw: 0, pitch: -12, title: 'Recepção', text: 'Concierge e atendimento aos moradores.' }],
+  },
   {
     id: 'sala',
     name: 'Sala de estar',
@@ -32,6 +42,7 @@ export const rooms = [
     panorama: '',
     initialView: { yaw: 0, pitch: 0 },
     links: [
+      { to: 'lobby', yaw: 0, pitch: -8 },
       { to: 'cozinha', yaw: 90, pitch: -8 },
       { to: 'suite', yaw: -90, pitch: -8 },
       { to: 'varanda', yaw: 180, pitch: -8 },

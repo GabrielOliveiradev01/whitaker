@@ -217,6 +217,7 @@ button { font: inherit; color: inherit; }
 .room.is-active { border-color: var(--gold); }
 .room__name {
   position: relative;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
