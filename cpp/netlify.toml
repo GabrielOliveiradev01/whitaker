@@ -1,0 +1,5 @@
+# Site estático da CPP: sem etapa de build, publica a própria pasta.
+# Na Netlify, use Base directory = cpp.
+[build]
+  command = ""
+  publish = "."
