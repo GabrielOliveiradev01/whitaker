@@ -81,19 +81,20 @@ form.addEventListener('submit', async (e) => {
   btn.classList.add('loading')
   try {
     if (SHEETS_URL.startsWith('COLE_AQUI')) throw new Error('SHEETS_URL não configurada')
-    // text/plain evita o preflight de CORS que o Apps Script não responde.
-    await fetch(SHEETS_URL, {
+    // text/plain evita o preflight de CORS; o Apps Script devolve JSON legível.
+    const res = await fetch(SHEETS_URL, {
       method: 'POST',
-      mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(payload),
     })
+    const out = await res.json().catch(() => ({ ok: false, error: `Resposta inválida (HTTP ${res.status})` }))
+    if (!out.ok) throw new Error(out.error || 'Falha ao gravar na planilha')
     form.reset()
     form.hidden = true
     success.hidden = false
   } catch (err) {
     console.error(err)
-    msg.textContent = 'Não foi possível enviar agora. Tente novamente em instantes.'
+    msg.textContent = `Não foi possível enviar agora. (${err.message})`
   } finally {
     btn.disabled = false
     btn.classList.remove('loading')

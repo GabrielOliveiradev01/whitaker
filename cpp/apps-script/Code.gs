@@ -9,11 +9,17 @@
  * 4. Autorize, copie a URL gerada (termina em /exec) e cole em SHEETS_URL no script.js.
  */
 
+// Opcional: ID da planilha (o trecho entre /d/ e /edit no link dela).
+// Deixe vazio se o script foi criado pela planilha (Extensões → Apps Script).
+const SPREADSHEET_ID = ''
 const SHEET_NAME = 'Cadastros'
 const HEADERS = ['Nome', 'E-mail', 'Telefone', 'Bairro', 'Edifício', 'Data', 'Origem']
 
 function getSheet_() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet()
+  const ss = SPREADSHEET_ID
+    ? SpreadsheetApp.openById(SPREADSHEET_ID)
+    : SpreadsheetApp.getActiveSpreadsheet()
+  if (!ss) throw new Error('Script não vinculado a uma planilha: preencha SPREADSHEET_ID.')
   const sheet = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME)
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(HEADERS)
