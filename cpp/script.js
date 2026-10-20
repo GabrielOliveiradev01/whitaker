@@ -1,6 +1,6 @@
 // URL do App da Web do Google Apps Script (termina em /exec).
 // Veja apps-script/Code.gs para criar a sua.
-const SHEETS_URL = 'COLE_AQUI_A_URL_DO_APPS_SCRIPT'
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzAXfhJRKb9fhcTzFNdr_oXDS70chFJA_oSCGoEFAuVOBpvVmi204ubAnEF3sMZikd2/exec'
 
 const form = document.getElementById('form')
 const btn = document.getElementById('btn')
