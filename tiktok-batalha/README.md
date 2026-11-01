@@ -1,7 +1,7 @@
 # ⚔️ Batalha das Rosas: jogo para TikTok Live
 
-Dois times, **🔴 VERMELHO** e **🔵 AZUL**. Cada **🌹 Rosa** enviada na live coloca um soldado na arena
-com o **nome e a foto** de quem enviou. Quando o tempo de recrutamento acaba, os exércitos se enfrentam
+Dois times, **🔴 VERMELHO** e **🔵 AZUL**. Cada pessoa tem **um lutador** na arena com o seu **nome e foto**,
+e cada **🌹 Rosa** faz esse lutador **crescer**: mais tamanho, mais vida e mais dano. Quando o tempo de recrutamento acaba, os exércitos se enfrentam
 automaticamente, e vence o time que tiver o último soldado de pé.
 
 Tela vertical 1080×1920 (9:16), pronta para capturar no **TikTok LIVE Studio** ou no **OBS**.
@@ -12,14 +12,16 @@ Tela vertical 1080×1920 (9:16), pronta para capturar no **TikTok LIVE Studio** 
 |---|---|
 | Comentar `1` ou `vermelho` | Entra no time 🔴 |
 | Comentar `2` ou `azul` | Entra no time 🔵 |
-| Enviar 🌹 Rosa | +1 soldado no seu time (uma sequência de 10 rosas dá 10 soldados) |
-| Presente de 5 💎 ou mais | Invoca um **GIGANTE 👑** (mais vida e dano quanto mais caro o presente) |
-| Presente pequeno (não Rosa) | 1 soldado por diamante |
+| Enviar a 1ª 🌹 Rosa | Seu lutador entra na arena |
+| Cada 🌹 a mais | +1 de poder: o lutador fica **maior**, com mais vida e mais dano |
+| Chegar a 10 de poder | Vira **GIGANTE 👑**, com ataque em área que acerta vários inimigos de uma vez |
+| Outros presentes | Valem 1 de poder por diamante (ex.: presente de 30 💎 = +30) |
 
 Quem envia rosa sem ter escolhido time vai para o time com menos soldados.
 
 **Ciclo da rodada:** recrutamento (90s) → contagem 3‑2‑1 → batalha → tela de vitória com MVP (10s) → nova rodada.
-Rosas enviadas durante a batalha entram como **reforço**. O placar soma as vitórias de cada time.
+Rosas enviadas durante a batalha fazem o lutador crescer na hora, mas não recuperam a vida que ele já perdeu. Se o lutador morrer, a próxima rosa traz ele de volta.
+Depois de 45s de batalha começa a **🔥 FÚRIA**: o dano sobe sem parar até um time vencer. O placar soma as vitórias de cada time.
 
 ## Como rodar
 
@@ -40,7 +42,7 @@ node server.js
 ```
 
 Abra `http://localhost:8080/?demo=1`. Teclas: `Q`/`P` = rosa vermelho/azul, `A`/`L` = 10 rosas,
-`G`/`H` = gigante, `B` = bots automáticos, `ESPAÇO` = pular fase, `R` = reiniciar.
+`G`/`H` = presente de 30 💎, `B` = bots automáticos, `ESPAÇO` = pular fase, `R` = reiniciar.
 Use `?demo=1&bots=1` para uma batalha simulada rodando sozinha.
 
 ### Colocar na live
@@ -55,8 +57,7 @@ Use `?demo=1&bots=1` para uma batalha simulada rodando sozinha.
 |---|---|---|
 | `recrutar` | 90 | segundos de recrutamento |
 | `fim` | 10 | segundos da tela de vitória |
-| `max` | 220 | limite de soldados por time. Acima disso, novas rosas fortalecem soldados que já estão na arena |
-| `gigante` | 5 | diamantes mínimos para um presente virar Gigante |
+| `max` | 220 | limite de lutadores por time |
 | `reforcos` | 1 | `0` = rosas na batalha ficam guardadas para a próxima rodada |
 | `som` | 1 | `0` = sem som |
 

@@ -8,7 +8,7 @@ const CFG = {
   recruitSeconds: Number(params.get('recrutar') || (window.BATALHA_DEMO ? 30 : 90)),   // duração da fase de recrutamento
   endSeconds: Number(params.get('fim') || 10),             // tempo mostrando o vencedor
   maxUnitsPerTeam: Number(params.get('max') || 220),       // limite de soldados por time (desempenho)
-  giantMinDiamonds: Number(params.get('gigante') || 5),    // presente com >= N diamantes vira Gigante
+  giantMinDiamonds: 5,                                     // presente com >= N diamantes toca som especial
   reinforcements: params.get('reforcos') !== '0',          // rosas durante a batalha viram reforço
   sound: params.get('som') !== '0',
   demo: params.has('demo') || !!window.BATALHA_DEMO,
@@ -117,61 +117,66 @@ function spawnPoint(team) {
   return { x, y };
 }
 
-function spawnUnit(p, kind = 'soldier', diamonds = 1) {
-  const team = p.team;
-  if (teamCount(team) >= CFG.maxUnitsPerTeam) {
-    // Time cheio: fortalece um soldado aleatório desse jogador (ou do time)
-    const mine = units.filter((u) => u.owner === p.id && u.hp > 0);
-    const pool = mine.length ? mine : units.filter((u) => u.team === team && u.hp > 0);
-    const u = pool[(Math.random() * pool.length) | 0];
-    if (u) { u.maxHp += 30; u.hp += 30; u.dmg += 1; u.r = Math.min(u.r + 0.6, 60); burst(u.x, u.y, TEAMS[team].light, 8); }
-    return;
-  }
-  const { x, y } = spawnPoint(team);
-  const giant = kind === 'giant';
-  const scale = giant ? Math.min(1 + Math.log2(diamonds) * 0.35, 4) : 1;
-  const u = {
-    id: nextUnitId++, owner: p.id, team, kind, x, y, vx: 0, vy: 0,
-    r: giant ? 26 * scale : 22,
-    maxHp: giant ? Math.round(100 * Math.pow(diamonds, 0.75)) : 100,
-    dmg: giant ? 12 + Math.round(Math.sqrt(diamonds) * 2) : 10,
-    speed: giant ? 70 : 95 + Math.random() * 25,
-    range: 0, cd: Math.random() * 0.5, target: null, retarget: 0,
-    spawnT: 0.5, hitT: 0,
-  };
-  u.hp = u.maxHp;
+// Cada pessoa tem UM lutador. Cada 🌹 = +1 de poder: ele fica maior, com mais vida e mais dano.
+const BIG = 10; // a partir desse poder o lutador ganha coroa e ataque em área
+function applyPower(u) {
+  const pw = u.power;
+  const hpFrac = u.maxHp ? u.hp / u.maxHp : 1;
+  u.r = Math.min(22 + Math.sqrt(pw - 1) * 9, 120);
+  u.maxHp = 100 * pw;
+  u.hp = Math.max(1, u.maxHp * hpFrac);
+  u.dmg = Math.round(10 * Math.sqrt(pw));
+  u.speed = Math.max(55, 110 - Math.sqrt(pw) * 5);
   u.range = u.r * 0.35;
+}
+
+function spawnUnit(p, power) {
+  const { x, y } = spawnPoint(p.team);
+  const u = {
+    id: nextUnitId++, owner: p.id, team: p.team, x, y, vx: 0, vy: 0,
+    power, r: 22, maxHp: 0, hp: 0, dmg: 10, speed: 100, range: 0,
+    cd: Math.random() * 0.5, target: null, retarget: 0, spawnT: 0.5, hitT: 0,
+  };
+  applyPower(u);
+  u.hp = u.maxHp;
   units.push(u);
-  burst(x, y, TEAMS[team].color, giant ? 30 : 10);
+  burst(x, y, TEAMS[p.team].color, 14);
+  return u;
+}
+
+function growFighter(p, amount) {
+  let u = units.find((v) => v.owner === p.id && v.hp > 0);
+  if (!u) {
+    if (teamCount(p.team) >= CFG.maxUnitsPerTeam) return null;
+    return spawnUnit(p, amount);
+  }
+  const wasBig = u.power >= BIG;
+  u.power += amount;
+  applyPower(u);
+  if (phase !== 'battle') u.hp = u.maxHp; // fora da batalha fica com vida cheia
+  u.spawnT = 0.35;
+  burst(u.x, u.y, TEAMS[u.team].light, Math.min(40, 6 + amount * 2));
+  floatText(u.x, u.y - u.r - 20, `+${amount}🌹`, '#ffd34d');
+  if (!wasBig && u.power >= BIG) showBanner(`👑 ${p.nick} virou GIGANTE!`, TEAMS[u.team].color);
+  return u;
 }
 
 function addGift(ev) {
   const p = getPlayer(ev);
   const team = assignTeam(p);
   const T = TEAMS[team];
+  const amount = ev.count * (isRose(ev) ? 1 : Math.max(1, ev.diamonds));
   if (phase === 'end' || (phase === 'battle' && !CFG.reinforcements)) {
-    pushFeed(`${p.nick}: ${ev.count}x ${ev.giftName} (guardado p/ próxima rodada)`, T.light);
-    p.pending = (p.pending || 0) + ev.count * (isRose(ev) ? 1 : ev.diamonds);
+    pushFeed(`${p.nick}: +${amount}🌹 (guardado p/ próxima rodada)`, T.light);
+    p.pending = (p.pending || 0) + amount;
     return;
   }
-  if (isRose(ev)) {
-    p.roses += ev.count;
-    for (let i = 0; i < ev.count; i++) spawnUnit(p, 'soldier');
-    pushFeed(`🌹 ${p.nick} +${ev.count} soldado${ev.count > 1 ? 's' : ''} ${T.emoji}`, T.light);
-    beep(660, 0.06, 'triangle', 0.05);
-  } else if (ev.diamonds >= CFG.giantMinDiamonds) {
-    p.roses += ev.diamonds * ev.count;
-    for (let i = 0; i < ev.count; i++) spawnUnit(p, 'giant', ev.diamonds);
-    pushFeed(`🎁 ${p.nick} enviou ${ev.giftName}: GIGANTE ${T.emoji}!`, '#ffd34d');
-    showBanner(`${p.nick} invocou um GIGANTE!`, T.color);
-    beep(180, 0.3, 'sawtooth', 0.06);
-  } else {
-    const n = ev.count * Math.max(1, ev.diamonds);
-    p.roses += n;
-    for (let i = 0; i < n; i++) spawnUnit(p, 'soldier');
-    pushFeed(`🎁 ${p.nick} +${n} soldado${n > 1 ? 's' : ''} ${T.emoji}`, T.light);
-    beep(700, 0.06, 'triangle', 0.05);
-  }
+  p.roses += amount;
+  const u = growFighter(p, amount);
+  const label = isRose(ev) ? `🌹 ${p.nick} +${amount}` : `🎁 ${p.nick} ${ev.giftName} +${amount}`;
+  pushFeed(`${label} ${T.emoji}  (poder ${u ? u.power : p.roses})`, isRose(ev) ? T.light : '#ffd34d');
+  if (!isRose(ev) && amount >= CFG.giantMinDiamonds) beep(180, 0.3, 'sawtooth', 0.06);
+  else beep(660, 0.06, 'triangle', 0.05);
 }
 
 function onChat(ev) {
@@ -209,7 +214,7 @@ function startPhase(name) {
     units = []; particles = [];
     for (const p of players.values()) {
       p.kills = 0; p.roses = 0;
-      if (p.pending) { const n = p.pending; p.pending = 0; for (let i = 0; i < n; i++) spawnUnit(p, 'soldier'); p.roses += n; }
+      if (p.pending && p.team) { const n = p.pending; p.pending = 0; p.roses += n; growFighter(p, n); }
     }
     showBanner(`RODADA ${round} — ENVIE 🌹 PARA RECRUTAR!`, '#ffd34d');
   } else if (name === 'countdown') {
@@ -253,6 +258,8 @@ function neighbors(u, cb) {
     const c = grid.get((gx + dx) + ',' + (gy + dy)); if (c) for (const o of c) if (o !== u) cb(o);
   }
 }
+// Fúria: depois de 45s de batalha o dano sobe sem parar, pra toda rodada ter fim
+function fury() { return phase === 'battle' ? 1 + Math.max(0, phaseTime - 45) / 15 : 1; }
 function nearestEnemy(u) {
   let best = null, bd = Infinity;
   for (const o of units) {
@@ -304,16 +311,30 @@ function update(dt) {
         const reach = u.r + t.r + u.range;
         if (d > reach) { ax += (dx / d) * u.speed; ay += (dy / d) * u.speed; }
         else if (u.cd <= 0) {
-          u.cd = u.kind === 'giant' ? 0.9 : 0.6 + Math.random() * 0.2;
-          const dmg = Math.round(u.dmg * (0.8 + Math.random() * 0.4));
-          t.hp -= dmg; t.hitT = 0.12;
-          t.vx += (dx / d) * 120 * (u.kind === 'giant' ? 3 : 1); t.vy += (dy / d) * 120 * (u.kind === 'giant' ? 3 : 1);
-          floatText(t.x, t.y - t.r, '-' + dmg, '#fff');
-          if (performance.now() - lastHitSound > 60) { beep(120 + Math.random() * 120, 0.04, 'square', 0.02); lastHitSound = performance.now(); }
-          if (t.hp <= 0) {
-            burst(t.x, t.y, TEAMS[t.team].color, t.kind === 'giant' ? 40 : 14);
-            const killer = players.get(u.owner); if (killer) killer.kills++;
+          const big = u.power >= BIG;
+          u.cd = big ? 0.9 : 0.6 + Math.random() * 0.2;
+          const hit = (v, mult) => {
+            const dmg = Math.round(u.dmg * mult * fury() * (0.8 + Math.random() * 0.4));
+            v.hp -= dmg; v.hitT = 0.12;
+            const hx = v.x - u.x, hy = v.y - u.y, hd = Math.hypot(hx, hy) || 1;
+            const kb = 120 * Math.min(4, 1 + u.r / Math.max(v.r, 1) * 0.5);
+            v.vx += (hx / hd) * kb; v.vy += (hy / hd) * kb;
+            floatText(v.x, v.y - v.r, '-' + dmg, '#fff');
+            if (v.hp <= 0) {
+              burst(v.x, v.y, TEAMS[v.team].color, v.power >= BIG ? 40 : 14);
+              const killer = players.get(u.owner); if (killer) killer.kills++;
+            }
+          };
+          hit(t, 1);
+          if (big) {
+            // ataque em área: atinge outros inimigos encostados no gigante
+            neighbors(u, (o) => {
+              if (o === t || o.team === u.team || o.hp <= 0) return;
+              if (Math.hypot(o.x - u.x, o.y - u.y) < u.r + o.r + 25) hit(o, 0.5);
+            });
+            burst(u.x + dx / d * u.r, u.y + dy / d * u.r, '#ffd34d', 6);
           }
+          if (performance.now() - lastHitSound > 60) { beep(120 + Math.random() * 120, 0.04, 'square', 0.02); lastHitSound = performance.now(); }
         }
       }
     } else {
@@ -393,7 +414,7 @@ function drawHeader() {
   let label = '';
   if (phase === 'recruit') label = `RECRUTAMENTO • ${Math.ceil(phaseTime)}s`;
   else if (phase === 'countdown') label = 'PREPAREM-SE…';
-  else if (phase === 'battle') label = `BATALHA • ${Math.floor(phaseTime)}s`;
+  else if (phase === 'battle') label = fury() > 1 ? `🔥 FÚRIA x${fury().toFixed(1)} • ${Math.floor(phaseTime)}s` : `BATALHA • ${Math.floor(phaseTime)}s`;
   else label = 'FIM DA RODADA';
   text(`RODADA ${round}  •  ${label}`, W / 2, 245, 40, phase === 'battle' ? '#ff6b6b' : '#fff');
   if (phase === 'recruit' && CFG.recruitSeconds > 0) {
@@ -404,7 +425,7 @@ function drawHeader() {
 }
 
 function drawUnits() {
-  const showNames = units.length <= 140;
+  const showNames = units.length <= 160;
   const sorted = units.slice().sort((a, b) => a.y - b.y);
   for (const u of sorted) {
     const T = TEAMS[u.team];
@@ -426,9 +447,10 @@ function drawUnits() {
     } else if (u.hitT <= 0 && p) {
       text((p.nick || '?').slice(0, 1).toUpperCase(), u.x, u.y + 1, r * 1.1, T.light, 'center', 900, false);
     }
-    ctx.lineWidth = u.kind === 'giant' ? 7 : 4; ctx.strokeStyle = u.kind === 'giant' ? '#ffd34d' : T.color;
+    const big = u.power >= BIG;
+    ctx.lineWidth = big ? 7 : 4; ctx.strokeStyle = big ? '#ffd34d' : T.color;
     ctx.beginPath(); ctx.arc(u.x, u.y, r, 0, Math.PI * 2); ctx.stroke();
-    if (u.kind === 'giant') text('👑', u.x, u.y - r - 14, Math.max(26, r * 0.6), '#fff', 'center', 900, false);
+    if (big) text('👑', u.x, u.y - r - 14, Math.max(26, r * 0.5), '#fff', 'center', 900, false);
 
     // vida
     if (u.hp < u.maxHp) {
@@ -436,7 +458,11 @@ function drawUnits() {
       ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.fillRect(u.x - w / 2, u.y - r - 10, w, 6);
       ctx.fillStyle = f > 0.5 ? '#5dff7a' : f > 0.25 ? '#ffd34d' : '#ff4d4d'; ctx.fillRect(u.x - w / 2, u.y - r - 10, w * f, 6);
     }
-    if ((showNames || u.kind === 'giant') && p) text(clip(p.nick, 12), u.x, u.y + r + 14, u.kind === 'giant' ? 24 : 17, '#fff', 'center', 800);
+    if ((showNames || big) && p) {
+      const fs = Math.min(34, 17 + Math.sqrt(u.power) * 1.5);
+      text(clip(p.nick, 12), u.x, u.y + r + fs * 0.8, fs, '#fff', 'center', 800);
+      if (u.power > 1) text(`🌹${u.power}`, u.x, u.y + r + fs * 1.9, fs * 0.8, '#ffd34d', 'center', 800);
+    }
   }
 }
 
@@ -455,7 +481,7 @@ function drawFooter() {
   // instruções
   roundRect(40, y0, W - 80, 150, 28); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fill();
   text('Comente  1 = 🔴 VERMELHO   ou   2 = 🔵 AZUL', W / 2, y0 + 45, 38, '#fff');
-  text('Cada 🌹 ROSA = 1 SOLDADO  •  Presentes maiores = GIGANTE 👑', W / 2, y0 + 105, 32, '#ffd34d');
+  text('Cada 🌹 = seu lutador CRESCE  •  10🌹 = GIGANTE 👑', W / 2, y0 + 105, 32, '#ffd34d');
 
   // ranking de recrutadores
   const top = [...players.values()].filter((p) => p.roses > 0 || p.kills > 0)
@@ -566,6 +592,7 @@ function fakeGift(team, count = 1, diamonds = 1) {
 let botsOn = CFG.bots;
 setInterval(() => {
   if (!botsOn) return;
+  if (phase === 'battle' && Math.random() < 0.75) return; // menos rosas durante a luta
   const t = Math.random() < 0.5 ? 'red' : 'blue';
   const r = Math.random();
   if (r > 0.985) fakeGift(t, 1, 30); else fakeGift(t, r < 0.85 ? 1 : 5);
