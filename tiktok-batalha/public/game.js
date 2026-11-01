@@ -98,7 +98,7 @@ function chooseTeamFromComment(text) {
 }
 
 function assignTeam(p) {
-  if (!p.team) p.team = teamCount('red') <= teamCount('blue') ? 'red' : 'blue';
+  if (!p.team) { p.team = teamCount('red') <= teamCount('blue') ? 'red' : 'blue'; reportTeam(p); }
   return p.team;
 }
 
@@ -188,6 +188,7 @@ function onChat(ev) {
   const hasUnits = units.some((u) => u.owner === p.id && u.hp > 0);
   if (hasUnits && phase === 'battle') return; // não troca de time no meio da luta
   p.team = t;
+  reportTeam(p);
   for (const u of units) if (u.owner === p.id) { u.team = t; const s = spawnPoint(t); u.x = s.x; u.y = s.y; }
   pushFeed(`${p.nick} entrou no time ${TEAMS[t].emoji} ${TEAMS[t].name}`, TEAMS[t].light);
 }
@@ -587,6 +588,8 @@ function handleEvent(ev) {
 }
 // Aberto pelo servidor local (localhost): conecta nele mesmo.
 // Aberto pela Netlify (ou outro site): procura a "ponte" rodando no PC em ws://localhost:8080.
+let socket = null;
+function reportTeam(p) { try { if (socket && socket.readyState === 1) socket.send(JSON.stringify({ type: 'team', id: p.id, team: p.team })); } catch { /* sem servidor */ } }
 const IS_LOCAL = ['localhost', '127.0.0.1', ''].includes(location.hostname);
 function connectWS() {
   if (window.BATALHA_DEMO) { connStatus = { connected: false, message: 'Demonstração com bots (sem live)' }; return; }
@@ -595,7 +598,7 @@ function connectWS() {
     ? (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host
     : `ws://localhost:${params.get('porta') || 8080}`;
   let ws;
-  try { ws = new WebSocket(url); } catch { setTimeout(connectWS, 3000); return; }
+  try { ws = new WebSocket(url); socket = ws; } catch { setTimeout(connectWS, 3000); return; }
   ws.onmessage = (m) => { try { handleEvent(JSON.parse(m.data)); } catch (e) { console.error(e); } };
   ws.onclose = () => {
     connStatus = { connected: false, bridge: false, message: IS_LOCAL ? 'Servidor offline — reconectando…' : 'Ponte desligada: abra o iniciar-windows.bat no seu PC' };

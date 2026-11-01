@@ -4,6 +4,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { exec } from 'node:child_process';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { WebSocketServer } from 'ws';
 
@@ -49,7 +50,19 @@ const gameCfg = {
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.mp3': 'audio/mpeg' };
 
 const server = http.createServer((req, res) => {
-  const urlPath = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+  let urlPath = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+  if (urlPath === '/painel' || urlPath === '/painel/') urlPath = '/painel.html';
+  if (urlPath === '/presentes.csv') {
+    res.writeHead(200, { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': `attachment; filename="presentes-${today()}.csv"` });
+    return res.end('\uFEFF' + CSV_HEADER + gifts.map((g) => csvLine({ ...g, team: teams[g.id] || g.team })).join(''));
+  }
+  if (urlPath === '/simular' && !USERNAME) {
+    // só no modo demo: http://localhost:8080/simular?nome=ana&qtd=3
+    const q = new URL(req.url, 'http://x').searchParams;
+    const nome = q.get('nome') || 'teste';
+    handleGift({ id: 'sim-' + nome, user: nome, nick: nome, avatar: '', giftId: 5655, giftName: 'Rosa', diamonds: 1, count: Number(q.get('qtd')) || 1 });
+    res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('ok');
+  }
   if (urlPath === '/config.js') {
     res.writeHead(200, { 'Content-Type': MIME['.js'], 'Cache-Control': 'no-store' });
     return res.end(`window.BATALHA_CFG = ${JSON.stringify(gameCfg)};`);
@@ -73,7 +86,48 @@ function setStatus(patch) {
   broadcast(status);
   if (changed) console.log(`[${time()}] ${status.connected ? '🟢' : '⚪'} ${status.message}`);
 }
-wss.on('connection', (ws) => ws.send(JSON.stringify(status)));
+
+// ---------------- Registro de presentes (painel + planilha) ----------------
+const gifts = [];          // presentes desta sessão
+const teams = {};          // id do usuário -> 'red' | 'blue' (informado pelo jogo)
+const LOG_DIR = path.join(__dirname, 'registros');
+const today = () => new Date().toLocaleDateString('sv-SE'); // AAAA-MM-DD
+const CSV_HEADER = 'data;hora;usuario;nome;time;presente;quantidade;diamantes_cada;diamantes_total\n';
+const csvCell = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+const csvLine = (g) => [g.date, g.time, '@' + g.user, g.nick, g.team === 'red' ? 'Vermelho' : g.team === 'blue' ? 'Azul' : '', g.giftName, g.count, g.diamonds, g.count * g.diamonds].map(csvCell).join(';') + '\n';
+
+function handleGift(g) {
+  const now = new Date();
+  const rec = { ...g, type: 'gift', ts: now.getTime(), date: today(), time: now.toLocaleTimeString('pt-BR'), team: teams[g.id] || null };
+  gifts.push(rec);
+  if (gifts.length > 20000) gifts.shift();
+  console.log(`[${rec.time}] 🎁 ${g.nick} (@${g.user}): ${g.count}x ${g.giftName} (${g.diamonds}💎)`);
+  broadcast(rec);
+  // espera o jogo informar o time (ele escolhe na hora do 1º presente) e grava na planilha
+  setTimeout(() => {
+    rec.team = teams[g.id] || rec.team;
+    try {
+      fs.mkdirSync(LOG_DIR, { recursive: true });
+      const file = path.join(LOG_DIR, `presentes-${rec.date}.csv`);
+      if (!fs.existsSync(file)) fs.writeFileSync(file, '\uFEFF' + CSV_HEADER);
+      fs.appendFileSync(file, csvLine(rec));
+    } catch (e) { console.error('Não consegui salvar o registro:', e.message); }
+  }, 1500);
+}
+
+wss.on('connection', (ws) => {
+  ws.send(JSON.stringify(status));
+  ws.send(JSON.stringify({ type: 'history', gifts: gifts.slice(-5000), teams }));
+  ws.on('message', (raw) => {
+    try {
+      const m = JSON.parse(raw);
+      if (m.type === 'team' && m.id && (m.team === 'red' || m.team === 'blue')) {
+        teams[m.id] = m.team;
+        broadcast({ type: 'team', id: m.id, team: m.team });
+      }
+    } catch { /* ignora */ }
+  });
+});
 
 function userInfo(u = {}) {
   const avatar = u.profilePicture?.url?.[0] || u.profilePicture?.urls?.[0] || u.avatarThumb?.urlList?.[0] || u.avatarThumb?.url?.[0] || '';
@@ -112,8 +166,7 @@ async function startTikTok() {
       if (count <= 0) return;
       stats.gifts += count;
       if (Number(giftId) === 5655) stats.roses += count;
-      console.log(`[${time()}] 🎁 ${u.nick}: ${count}x ${giftName} (${diamonds}💎)`);
-      broadcast({ type: 'gift', ...u, giftId, giftName, diamonds, count });
+      handleGift({ ...u, giftId, giftName, diamonds, count });
     });
 
     c.on(WebcastEvent.CHAT, (d) => broadcast({ type: 'chat', ...userInfo(d.user), comment: d.comment || '' }));
@@ -180,6 +233,10 @@ server.listen(PORT, () => {
   console.log('==============================================');
   console.log(`   Tela do jogo (use no LIVE Studio/OBS): ${url}`);
   console.log(`   Teste sem live:                       ${url}/?demo=1&bots=1`);
+  console.log(`   Painel (quem mandou rosa):            ${url}/painel`);
+  const lan = Object.values(os.networkInterfaces()).flat().find((i) => i && i.family === 'IPv4' && !i.internal);
+  if (lan) console.log(`   Painel no celular (mesmo Wi-Fi):      http://${lan.address}:${PORT}/painel`);
+  console.log(`   Planilha de presentes:                pasta "registros"`);
   console.log('   Para fechar: feche esta janela (ou Ctrl+C)\n');
   if (USERNAME) startTikTok();
   else console.log('⚠️  Nenhum usuário configurado. Abra o config.json e coloque seu @ em "usuario_tiktok".\n');

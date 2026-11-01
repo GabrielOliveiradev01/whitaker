@@ -49,6 +49,24 @@ Pronto. O programa **espera você ficar ao vivo e conecta sozinho**, reconecta s
 quando a live acaba ele fica aguardando a próxima. As rodadas rodam em loop, sem você mexer em nada.
 Na janela preta aparece cada presente recebido; no rodapé do jogo, 🟢 = conectado.
 
+### Ver quem mandou rosa (painel)
+
+Com o `iniciar-windows.bat` aberto:
+
+- **No PC:** abra `http://localhost:8080/painel`
+- **No celular** (no mesmo Wi-Fi do PC): use o endereço que aparece na janela preta, em
+  "Painel no celular", algo como `http://192.168.0.10:8080/painel`
+  (se o Windows perguntar sobre o Firewall, clique em **Permitir**)
+
+O painel mostra, ao vivo:
+- total de rosas, diamantes e pessoas, e quanto cada time arrecadou
+- **ranking** de quem mais enviou (rosas, outros presentes, total em 💎, time e horário do último envio), com busca por @
+- lista de cada envio na hora em que chega (marque "som a cada presente" para ouvir um aviso)
+
+**Planilha:** cada presente também é salvo na pasta **`registros`**, um arquivo por dia
+(`presentes-AAAA-MM-DD.csv`, abre no Excel ou Google Planilhas), com data, hora, @, nome, time,
+presente, quantidade e diamantes. O botão "Baixar planilha" do painel baixa os presentes da sessão atual.
+
 ### Se não conectar
 
 | Mensagem | O que fazer |

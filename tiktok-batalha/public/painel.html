@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Painel — Batalha das Rosas</title>
+<style>
+  :root { --bg:#0b0d14; --card:#151925; --line:#262c3d; --txt:#e8ebf3; --mut:#8a93a8; --red:#ff4d5e; --blue:#3d95ff; --gold:#ffd34d; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:15px/1.4 system-ui, "Segoe UI", Arial, sans-serif; }
+  header { display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--bg); z-index:2; }
+  h1 { font-size:20px; margin:0; }
+  #status { font-size:13px; color:var(--mut); }
+  .btn { background:#2a3144; color:#fff; border:0; border-radius:8px; padding:8px 12px; font:600 14px system-ui; cursor:pointer; text-decoration:none; }
+  main { display:grid; grid-template-columns: 1.3fr 1fr; gap:16px; padding:16px 18px; }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+  .stats { grid-column:1/-1; display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:12px; }
+  .stat { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 14px; }
+  .stat .v { font-size:28px; font-weight:800; }
+  .stat .l { color:var(--mut); font-size:13px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .card h2 { font-size:15px; margin:0; padding:12px 14px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; gap:8px; align-items:center; }
+  input[type=search] { background:#0f121b; border:1px solid var(--line); color:var(--txt); border-radius:8px; padding:6px 10px; font:14px system-ui; width:170px; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { text-align:left; padding:8px 12px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  th { color:var(--mut); font-weight:600; font-size:12px; text-transform:uppercase; cursor:pointer; user-select:none; }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .who { display:flex; align-items:center; gap:8px; }
+  .av { width:28px; height:28px; border-radius:50%; background:#2a3144; object-fit:cover; flex:none; display:inline-flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; }
+  .nick { font-weight:700; } .user { color:var(--mut); font-size:12px; }
+  .tag { font-size:12px; font-weight:700; padding:2px 8px; border-radius:99px; }
+  .tag.red { background:rgba(255,77,94,.18); color:var(--red); } .tag.blue { background:rgba(61,149,255,.18); color:var(--blue); } .tag.none { color:var(--mut); }
+  .scroll { max-height: 70vh; overflow:auto; }
+  #feed li { list-style:none; display:flex; gap:10px; align-items:center; padding:8px 12px; border-bottom:1px solid var(--line); }
+  #feed { margin:0; padding:0; }
+  #feed .t { color:var(--mut); font-size:12px; width:62px; flex:none; font-variant-numeric:tabular-nums; }
+  #feed .g { margin-left:auto; font-weight:800; color:var(--gold); white-space:nowrap; }
+  #feed li.new { animation: flash 1.2s ease-out; }
+  @keyframes flash { from { background:rgba(255,211,77,.25); } to { background:transparent; } }
+  .empty { color:var(--mut); padding:18px 14px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>🌹 Painel de presentes — Batalha das Rosas</h1>
+    <div id="status">Conectando…</div>
+  </div>
+  <div style="display:flex; gap:8px; align-items:center">
+    <label style="font-size:13px;color:var(--mut)"><input type="checkbox" id="snd" /> som a cada presente</label>
+    <a class="btn" id="csv" href="/presentes.csv">⬇️ Baixar planilha</a>
+  </div>
+</header>
+<main>
+  <section class="stats">
+    <div class="stat"><div class="v" id="sRoses">0</div><div class="l">🌹 rosas</div></div>
+    <div class="stat"><div class="v" id="sDiam">0</div><div class="l">💎 diamantes no total</div></div>
+    <div class="stat"><div class="v" id="sPeople">0</div><div class="l">👥 pessoas que enviaram</div></div>
+    <div class="stat"><div class="v" style="color:var(--red)" id="sRed">0</div><div class="l">💎 time Vermelho</div></div>
+    <div class="stat"><div class="v" style="color:var(--blue)" id="sBlue">0</div><div class="l">💎 time Azul</div></div>
+  </section>
+
+  <section class="card">
+    <h2>🏆 Ranking de quem enviou <input type="search" id="q" placeholder="buscar @ ou nome" /></h2>
+    <div class="scroll">
+      <table>
+        <thead><tr>
+          <th>#</th><th data-k="nick">Pessoa</th><th data-k="team">Time</th>
+          <th class="num" data-k="roses">🌹 Rosas</th><th class="num" data-k="others">🎁 Outros</th>
+          <th class="num" data-k="diamonds">💎 Total</th><th class="num" data-k="last">Último</th>
+        </tr></thead>
+        <tbody id="rank"></tbody>
+      </table>
+      <div class="empty" id="rankEmpty">Nenhum presente ainda nesta sessão.</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>⚡ Ao vivo <span style="color:var(--mut);font-weight:400;font-size:13px" id="feedCount"></span></h2>
+    <div class="scroll"><ul id="feed"></ul><div class="empty" id="feedEmpty">Aguardando presentes…</div></div>
+  </section>
+</main>
+
+<script>
+'use strict';
+const ROSE = 5655;
+const people = new Map(); // id -> { id, nick, user, avatar, team, roses, others, diamonds, last }
+const teams = {};
+let gifts = [];
+let sortKey = 'diamonds';
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const isRose = (g) => Number(g.giftId) === ROSE || /^(rose|rosa)$/i.test(g.giftName || '');
+const fmt = (n) => n.toLocaleString('pt-BR');
+
+function add(g) {
+  gifts.push(g);
+  let p = people.get(g.id);
+  if (!p) { p = { id: g.id, nick: g.nick, user: g.user, avatar: g.avatar, team: null, roses: 0, others: 0, diamonds: 0, last: 0 }; people.set(g.id, p); }
+  p.nick = g.nick || p.nick; p.avatar = g.avatar || p.avatar;
+  if (isRose(g)) p.roses += g.count; else p.others += g.count;
+  p.diamonds += g.count * (g.diamonds || 1);
+  p.last = g.ts || Date.now();
+}
+
+function avatar(p) {
+  return p.avatar ? `<img class="av" src="${esc(p.avatar)}" referrerpolicy="no-referrer" loading="lazy">` : `<span class="av">${esc((p.nick || '?')[0].toUpperCase())}</span>`;
+}
+function teamTag(t) { return t === 'red' ? '<span class="tag red">🔴 Vermelho</span>' : t === 'blue' ? '<span class="tag blue">🔵 Azul</span>' : '<span class="tag none">—</span>'; }
+
+function render() {
+  let roses = 0, diam = 0, red = 0, blue = 0;
+  for (const p of people.values()) {
+    p.team = teams[p.id] || null;
+    roses += p.roses; diam += p.diamonds;
+    if (p.team === 'red') red += p.diamonds; else if (p.team === 'blue') blue += p.diamonds;
+  }
+  $('sRoses').textContent = fmt(roses); $('sDiam').textContent = fmt(diam); $('sPeople').textContent = fmt(people.size);
+  $('sRed').textContent = fmt(red); $('sBlue').textContent = fmt(blue);
+
+  const q = $('q').value.trim().toLowerCase();
+  const list = [...people.values()]
+    .filter((p) => !q || (p.nick || '').toLowerCase().includes(q) || (p.user || '').toLowerCase().includes(q))
+    .sort((a, b) => sortKey === 'nick' ? (a.nick || '').localeCompare(b.nick || '') : sortKey === 'team' ? String(a.team).localeCompare(String(b.team)) : b[sortKey] - a[sortKey]);
+  $('rank').innerHTML = list.map((p, i) => `<tr>
+    <td>${i + 1}</td>
+    <td><div class="who">${avatar(p)}<div><div class="nick">${esc(p.nick)}</div><div class="user">@${esc(p.user)}</div></div></div></td>
+    <td>${teamTag(p.team)}</td>
+    <td class="num">${fmt(p.roses)}</td><td class="num">${fmt(p.others)}</td>
+    <td class="num"><b>${fmt(p.diamonds)}</b></td>
+    <td class="num">${new Date(p.last).toLocaleTimeString('pt-BR')}</td></tr>`).join('');
+  $('rankEmpty').style.display = people.size ? 'none' : 'block';
+  $('feedEmpty').style.display = gifts.length ? 'none' : 'block';
+  $('feedCount').textContent = gifts.length ? `${fmt(gifts.length)} envios` : '';
+}
+
+function feedItem(g, isNew) {
+  const li = document.createElement('li');
+  if (isNew) li.className = 'new';
+  li.innerHTML = `<span class="t">${esc(g.time || '')}</span>${avatar(g)}<div><div class="nick">${esc(g.nick)}</div><div class="user">@${esc(g.user)}</div></div>
+    <span class="g">${g.count}x ${isRose(g) ? '🌹' : '🎁 ' + esc(g.giftName)}</span>`;
+  const feed = $('feed');
+  feed.prepend(li);
+  while (feed.children.length > 300) feed.lastChild.remove();
+}
+
+let audio;
+function ding() {
+  if (!$('snd').checked) return;
+  try {
+    audio = audio || new AudioContext();
+    const o = audio.createOscillator(), g = audio.createGain();
+    o.frequency.value = 880; o.type = 'triangle';
+    g.gain.setValueAtTime(0.08, audio.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + 0.25);
+    o.connect(g).connect(audio.destination); o.start(); o.stop(audio.currentTime + 0.25);
+  } catch {}
+}
+
+function connect() {
+  const local = ['localhost', '127.0.0.1'].includes(location.hostname) || /^(192\.168|10\.|172\.)/.test(location.hostname);
+  const ws = new WebSocket(local ? 'ws://' + location.host : 'ws://localhost:8080');
+  ws.onmessage = (m) => {
+    const ev = JSON.parse(m.data);
+    if (ev.type === 'status') {
+      $('status').textContent = (ev.connected ? '🟢 ' : '⚪ ') + ev.message;
+    } else if (ev.type === 'history') {
+      people.clear(); gifts = []; $('feed').innerHTML = '';
+      Object.assign(teams, ev.teams || {});
+      for (const g of ev.gifts) { add(g); feedItem(g, false); }
+      render();
+    } else if (ev.type === 'gift') {
+      add(ev); feedItem(ev, true); ding(); render();
+    } else if (ev.type === 'team') {
+      teams[ev.id] = ev.team; render();
+    }
+  };
+  ws.onclose = () => { $('status').textContent = '⚪ Servidor desligado — abra o iniciar-windows.bat. Reconectando…'; setTimeout(connect, 3000); };
+}
+
+document.querySelectorAll('th[data-k]').forEach((th) => th.addEventListener('click', () => { sortKey = th.dataset.k; render(); }));
+$('q').addEventListener('input', render);
+setInterval(render, 5000);
+if (!['localhost', '127.0.0.1'].includes(location.hostname) && !/^(192\.168|10\.|172\.)/.test(location.hostname)) $('csv').href = 'http://localhost:8080/presentes.csv';
+connect();
+</script>
+</body>
+</html>
