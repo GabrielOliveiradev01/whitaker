@@ -1,0 +1,10 @@
+{
+  "usuario_tiktok": "",
+  "chave_euler": "",
+  "porta": 8080,
+  "abrir_navegador": true,
+  "tempo_recrutamento": 60,
+  "tempo_vitoria": 10,
+  "max_lutadores_por_time": 220,
+  "som": true
+}

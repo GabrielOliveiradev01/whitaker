@@ -23,35 +23,60 @@ Quem envia rosa sem ter escolhido time vai para o time com menos soldados.
 Os times só se formam no recrutamento. **Tudo que chegar depois (na contagem, na batalha ou na tela de vitória) fica guardado para a próxima rodada**, e o topo da tela mostra quanto cada time já juntou. Quando a nova rodada começa, os lutadores dessas pessoas já entram com esse tamanho.
 Depois de 45s de batalha começa a **🔥 FÚRIA**: o dano sobe sem parar até um time vencer. O placar soma as vitórias de cada time.
 
-## Como rodar
+## Começar a fazer lives (passo a passo)
 
-Requisito: [Node.js 18+](https://nodejs.org).
+### Uma vez só (preparação)
 
-```bash
-cd tiktok-batalha
-npm install
-node server.js SEU_USUARIO_TIKTOK
-```
+1. Instale o **Node.js** (versão LTS): https://nodejs.org
+2. Baixe esta pasta `tiktok-batalha` para o seu computador.
+3. Abra o arquivo **`config.json`** no Bloco de Notas e coloque o seu @ do TikTok:
+   ```json
+   "usuario_tiktok": "seu_usuario",
+   ```
+   Salve o arquivo.
+4. Dê dois cliques em **`iniciar-windows.bat`** (no Mac: **`iniciar-mac.command`**).
+   Na primeira vez ele instala o que precisa (leva uns segundos) e abre o jogo no navegador.
+5. No **TikTok LIVE Studio**: Adicionar fonte → *Link* → `http://localhost:8080`, tamanho 1080×1920.
+   No **OBS**: Fonte → *Navegador* → `http://localhost:8080`, largura 1080, altura 1920
+   (marque "Controlar áudio via OBS" para os sons).
 
-Abra `http://localhost:8080`. Você precisa estar **ao vivo** para a conexão funcionar.
+### Todo dia de live
 
-### Testar sem live (modo demo)
+1. Dois cliques em `iniciar-windows.bat` e deixe a janela preta aberta.
+2. Entre ao vivo normalmente.
 
-```bash
-node server.js
-```
+Pronto. O programa **espera você ficar ao vivo e conecta sozinho**, reconecta se a conexão cair, e
+quando a live acaba ele fica aguardando a próxima. As rodadas rodam em loop, sem você mexer em nada.
+Na janela preta aparece cada presente recebido; no rodapé do jogo, 🟢 = conectado.
 
-Abra `http://localhost:8080/?demo=1`. Teclas: `Q`/`P` = rosa vermelho/azul, `A`/`L` = 10 rosas,
-`G`/`H` = presente de 30 💎, `B` = bots automáticos, `ESPAÇO` = pular fase, `R` = reiniciar.
-Use `?demo=1&bots=1` para uma batalha simulada rodando sozinha.
+### Se não conectar
 
-### Colocar na live
+| Mensagem | O que fazer |
+|---|---|
+| `Aguardando @usuario entrar ao vivo…` | Normal antes da live. Se você já está ao vivo, confira o @ no `config.json` |
+| `Limite do servidor de assinatura…` | Crie uma chave grátis em https://www.eulerstream.com e cole em `"chave_euler"` no `config.json` |
+| `A porta 8080 já está em uso` | O jogo já está aberto em outra janela. Feche-a, ou troque `"porta"` |
+| `Node.js não está instalado` | Instale pelo site que abriu e rode de novo |
 
-- **TikTok LIVE Studio:** Adicionar fonte → *Link* → `http://localhost:8080`, tamanho 1080×1920.
-- **OBS:** Fonte → *Navegador* → URL `http://localhost:8080`, largura 1080, altura 1920.
-  Marque "Controlar áudio via OBS" se quiser os efeitos sonoros.
+### Testar sem live
 
-## Configurações (pela URL)
+Deixe `"usuario_tiktok"` vazio, ou abra `http://localhost:8080/?demo=1&bots=1`. Teclas: `Q`/`P` = rosa
+vermelho/azul, `A`/`L` = 10 rosas, `G`/`H` = presente de 30 💎, `B` = bots, `ESPAÇO` = pular fase, `R` = reiniciar.
+
+### config.json
+
+| Campo | Padrão | Descrição |
+|---|---|---|
+| `usuario_tiktok` | — | seu @ do TikTok |
+| `chave_euler` | — | chave da Euler Stream (opcional, use se der limite) |
+| `porta` | 8080 | porta local do jogo |
+| `abrir_navegador` | true | abre o jogo no navegador ao iniciar |
+| `tempo_recrutamento` | 60 | segundos para montar os times |
+| `tempo_vitoria` | 10 | segundos da tela de vitória |
+| `max_lutadores_por_time` | 220 | limite de lutadores por time |
+| `som` | true | efeitos sonoros |
+
+## Configurações pela URL (sobrescrevem o config.json)
 
 | Parâmetro | Padrão | Descrição |
 |---|---|---|
@@ -65,13 +90,9 @@ Exemplo: `http://localhost:8080/?recrutar=60&max=150`
 
 ## Conexão com o TikTok
 
-A biblioteca [`tiktok-live-connector`](https://www.npmjs.com/package/tiktok-live-connector) usa o servidor
-de assinatura da Euler Stream. Se a conexão falhar por limite de uso, crie uma chave grátis em
-eulerstream.com e rode:
-
-```bash
-SIGN_API_KEY=sua_chave node server.js SEU_USUARIO_TIKTOK
-```
+A conexão usa a biblioteca [`tiktok-live-connector`](https://www.npmjs.com/package/tiktok-live-connector),
+que não é oficial do TikTok. Ela depende do servidor de assinatura da Euler Stream e pode precisar de
+atualização quando o TikTok muda algo (rode `npm update` dentro da pasta).
 
 O jogo também expõe `window.batalha.gift({ user, nick, giftName: 'Rosa', count: 1 })`, para integrar
 com outras ferramentas, como TikFinity.

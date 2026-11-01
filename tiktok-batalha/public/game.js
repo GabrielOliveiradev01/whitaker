@@ -4,13 +4,14 @@
 
 // ---------------- Configuração (pode mudar pela URL: ?recrutar=60&max=200&som=0) ----------------
 const params = new URLSearchParams(location.search);
+const SRV = window.BATALHA_CFG || {}; // vem do config.json via servidor
 const CFG = {
-  recruitSeconds: Number(params.get('recrutar') || 60),   // duração da fase de recrutamento
-  endSeconds: Number(params.get('fim') || 10),             // tempo mostrando o vencedor
-  maxUnitsPerTeam: Number(params.get('max') || 220),       // limite de soldados por time (desempenho)
+  recruitSeconds: Number(params.get('recrutar') || SRV.recruitSeconds || 60),   // duração da fase de recrutamento
+  endSeconds: Number(params.get('fim') || SRV.endSeconds || 10),             // tempo mostrando o vencedor
+  maxUnitsPerTeam: Number(params.get('max') || SRV.maxUnitsPerTeam || 220),       // limite de soldados por time (desempenho)
   giantMinDiamonds: 5,                                     // presente com >= N diamantes toca som especial
   reinforcements: params.get('reforcos') === '1',          // padrão: o que chega depois de montar o time fica pra próxima rodada
-  sound: params.get('som') !== '0',
+  sound: params.has('som') ? params.get('som') !== '0' : SRV.sound !== false,
   demo: params.has('demo') || !!window.BATALHA_DEMO,
   bots: params.has('bots') || !!window.BATALHA_DEMO,
 };
