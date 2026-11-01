@@ -19,8 +19,8 @@ Tela vertical 1080×1920 (9:16), pronta para capturar no **TikTok LIVE Studio** 
 
 Quem envia rosa sem ter escolhido time vai para o time com menos soldados.
 
-**Ciclo da rodada:** recrutamento (90s) → contagem 3‑2‑1 → batalha → tela de vitória com MVP (10s) → nova rodada.
-Rosas enviadas durante a batalha fazem o lutador crescer na hora, mas não recuperam a vida que ele já perdeu. Se o lutador morrer, a próxima rosa traz ele de volta.
+**Ciclo da rodada:** recrutamento (**1 minuto** para montar os times) → contagem 3‑2‑1 → batalha → tela de vitória com MVP (10s) → nova rodada.
+Os times só se formam no recrutamento. **Tudo que chegar depois (na contagem, na batalha ou na tela de vitória) fica guardado para a próxima rodada**, e o topo da tela mostra quanto cada time já juntou. Quando a nova rodada começa, os lutadores dessas pessoas já entram com esse tamanho.
 Depois de 45s de batalha começa a **🔥 FÚRIA**: o dano sobe sem parar até um time vencer. O placar soma as vitórias de cada time.
 
 ## Como rodar
@@ -55,10 +55,10 @@ Use `?demo=1&bots=1` para uma batalha simulada rodando sozinha.
 
 | Parâmetro | Padrão | Descrição |
 |---|---|---|
-| `recrutar` | 90 | segundos de recrutamento |
+| `recrutar` | 60 | segundos de recrutamento |
 | `fim` | 10 | segundos da tela de vitória |
 | `max` | 220 | limite de lutadores por time |
-| `reforcos` | 1 | `0` = rosas na batalha ficam guardadas para a próxima rodada |
+| `reforcos` | 0 | `1` = rosas na batalha fazem o lutador crescer na hora, em vez de ficar para a próxima rodada |
 | `som` | 1 | `0` = sem som |
 
 Exemplo: `http://localhost:8080/?recrutar=60&max=150`

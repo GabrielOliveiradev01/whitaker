@@ -5,11 +5,11 @@
 // ---------------- Configuração (pode mudar pela URL: ?recrutar=60&max=200&som=0) ----------------
 const params = new URLSearchParams(location.search);
 const CFG = {
-  recruitSeconds: Number(params.get('recrutar') || (window.BATALHA_DEMO ? 30 : 90)),   // duração da fase de recrutamento
+  recruitSeconds: Number(params.get('recrutar') || 60),   // duração da fase de recrutamento
   endSeconds: Number(params.get('fim') || 10),             // tempo mostrando o vencedor
   maxUnitsPerTeam: Number(params.get('max') || 220),       // limite de soldados por time (desempenho)
   giantMinDiamonds: 5,                                     // presente com >= N diamantes toca som especial
-  reinforcements: params.get('reforcos') !== '0',          // rosas durante a batalha viram reforço
+  reinforcements: params.get('reforcos') === '1',          // padrão: o que chega depois de montar o time fica pra próxima rodada
   sound: params.get('som') !== '0',
   demo: params.has('demo') || !!window.BATALHA_DEMO,
   bots: params.has('bots') || !!window.BATALHA_DEMO,
@@ -166,8 +166,8 @@ function addGift(ev) {
   const team = assignTeam(p);
   const T = TEAMS[team];
   const amount = ev.count * (isRose(ev) ? 1 : Math.max(1, ev.diamonds));
-  if (phase === 'end' || (phase === 'battle' && !CFG.reinforcements)) {
-    pushFeed(`${p.nick}: +${amount}🌹 (guardado p/ próxima rodada)`, T.light);
+  if (phase === 'end' || phase === 'countdown' || (phase === 'battle' && !CFG.reinforcements)) {
+    pushFeed(`⏳ ${p.nick} +${amount}🌹 → próxima rodada ${T.emoji}`, T.light);
     p.pending = (p.pending || 0) + amount;
     return;
   }
@@ -417,6 +417,11 @@ function drawHeader() {
   else if (phase === 'battle') label = fury() > 1 ? `🔥 FÚRIA x${fury().toFixed(1)} • ${Math.floor(phaseTime)}s` : `BATALHA • ${Math.floor(phaseTime)}s`;
   else label = 'FIM DA RODADA';
   text(`RODADA ${round}  •  ${label}`, W / 2, 245, 40, phase === 'battle' ? '#ff6b6b' : '#fff');
+  if (phase !== 'recruit') {
+    let pr = 0, pb = 0;
+    for (const p of players.values()) if (p.pending) { if (p.team === 'red') pr += p.pending; else pb += p.pending; }
+    text(`⏳ PRÓXIMA RODADA:  🔴 ${pr}🌹   🔵 ${pb}🌹`, W / 2, 292, 28, '#ffd34d', 'center', 800);
+  }
   if (phase === 'recruit' && CFG.recruitSeconds > 0) {
     const f = Math.max(0, phaseTime) / CFG.recruitSeconds;
     roundRect(160, 280, W - 320, 14, 7); ctx.fillStyle = 'rgba(255,255,255,.15)'; ctx.fill();
@@ -481,7 +486,7 @@ function drawFooter() {
   // instruções
   roundRect(40, y0, W - 80, 150, 28); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fill();
   text('Comente  1 = 🔴 VERMELHO   ou   2 = 🔵 AZUL', W / 2, y0 + 45, 38, '#fff');
-  text('Cada 🌹 = seu lutador CRESCE  •  10🌹 = GIGANTE 👑', W / 2, y0 + 105, 32, '#ffd34d');
+  text(phase === 'recruit' ? 'Cada 🌹 = seu lutador CRESCE  •  10🌹 = GIGANTE 👑' : '🌹 enviadas agora valem para a PRÓXIMA RODADA', W / 2, y0 + 105, 32, '#ffd34d');
 
   // ranking de recrutadores
   const top = [...players.values()].filter((p) => p.roses > 0 || p.kills > 0)
@@ -592,7 +597,7 @@ function fakeGift(team, count = 1, diamonds = 1) {
 let botsOn = CFG.bots;
 setInterval(() => {
   if (!botsOn) return;
-  if (phase === 'battle' && Math.random() < 0.75) return; // menos rosas durante a luta
+  if (phase !== 'recruit' && Math.random() < 0.6) return; // menos rosas fora do recrutamento
   const t = Math.random() < 0.5 ? 'red' : 'blue';
   const r = Math.random();
   if (r > 0.985) fakeGift(t, 1, 30); else fakeGift(t, r < 0.85 ? 1 : 5);
