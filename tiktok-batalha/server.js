@@ -64,7 +64,7 @@ const server = http.createServer((req, res) => {
 });
 
 const wss = new WebSocketServer({ server });
-let status = { type: 'status', connected: false, username: USERNAME, message: USERNAME ? 'Iniciando…' : 'Modo demo: coloque seu usuário no config.json' };
+let status = { type: 'status', game: gameCfg, connected: false, username: USERNAME, message: USERNAME ? 'Iniciando…' : 'Modo demo: coloque seu usuário no config.json' };
 const broadcast = (msg) => { const s = JSON.stringify(msg); for (const c of wss.clients) if (c.readyState === 1) c.send(s); };
 const time = () => new Date().toLocaleTimeString('pt-BR');
 function setStatus(patch) {

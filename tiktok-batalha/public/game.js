@@ -524,6 +524,7 @@ function drawOverlay() {
   if (phase === 'recruit' && units.length === 0) {
     text('ENVIE UMA 🌹 PARA', W / 2, cy - 50, 64, '#fff');
     text('ENTRAR NA BATALHA!', W / 2, cy + 30, 64, '#ffd34d');
+    if (!CFG.demo && !connStatus.connected) text('⚠️ ' + clip(connStatus.message || '', 52), W / 2, cy + 120, 28, '#ffb3b3', 'center', 800);
   }
   if (phase === 'countdown') {
     const n = Math.ceil(phaseTime);
@@ -572,16 +573,34 @@ function loop(now) {
 
 // ---------------- Conexão com o servidor ----------------
 function handleEvent(ev) {
-  if (ev.type === 'status') connStatus = ev;
+  if (ev.type === 'status') {
+    connStatus = { ...ev, bridge: true };
+    // configurações do config.json do PC (a URL tem prioridade)
+    const g = ev.game || {};
+    if (g.recruitSeconds && !params.has('recrutar')) CFG.recruitSeconds = g.recruitSeconds;
+    if (g.endSeconds && !params.has('fim')) CFG.endSeconds = g.endSeconds;
+    if (g.maxUnitsPerTeam && !params.has('max')) CFG.maxUnitsPerTeam = g.maxUnitsPerTeam;
+    if (typeof g.sound === 'boolean' && !params.has('som')) CFG.sound = g.sound;
+  }
   else if (ev.type === 'gift') addGift(ev);
   else if (ev.type === 'chat') onChat(ev);
 }
+// Aberto pelo servidor local (localhost): conecta nele mesmo.
+// Aberto pela Netlify (ou outro site): procura a "ponte" rodando no PC em ws://localhost:8080.
+const IS_LOCAL = ['localhost', '127.0.0.1', ''].includes(location.hostname);
 function connectWS() {
   if (window.BATALHA_DEMO) { connStatus = { connected: false, message: 'Demonstração com bots (sem live)' }; return; }
   if (location.protocol === 'file:') { connStatus = { connected: false, message: 'Aberto como arquivo: só modo demo' }; return; }
-  const ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host);
+  const url = IS_LOCAL
+    ? (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host
+    : `ws://localhost:${params.get('porta') || 8080}`;
+  let ws;
+  try { ws = new WebSocket(url); } catch { setTimeout(connectWS, 3000); return; }
   ws.onmessage = (m) => { try { handleEvent(JSON.parse(m.data)); } catch (e) { console.error(e); } };
-  ws.onclose = () => { connStatus = { connected: false, message: 'Servidor offline — reconectando…' }; setTimeout(connectWS, 3000); };
+  ws.onclose = () => {
+    connStatus = { connected: false, bridge: false, message: IS_LOCAL ? 'Servidor offline — reconectando…' : 'Ponte desligada: abra o iniciar-windows.bat no seu PC' };
+    setTimeout(connectWS, 3000);
+  };
 }
 
 // ---------------- Modo demo / bots ----------------
