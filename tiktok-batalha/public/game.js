@@ -5,14 +5,14 @@
 // ---------------- Configuração (pode mudar pela URL: ?recrutar=60&max=200&som=0) ----------------
 const params = new URLSearchParams(location.search);
 const CFG = {
-  recruitSeconds: Number(params.get('recrutar') || 90),   // duração da fase de recrutamento
+  recruitSeconds: Number(params.get('recrutar') || (window.BATALHA_DEMO ? 30 : 90)),   // duração da fase de recrutamento
   endSeconds: Number(params.get('fim') || 10),             // tempo mostrando o vencedor
   maxUnitsPerTeam: Number(params.get('max') || 220),       // limite de soldados por time (desempenho)
   giantMinDiamonds: Number(params.get('gigante') || 5),    // presente com >= N diamantes vira Gigante
   reinforcements: params.get('reforcos') !== '0',          // rosas durante a batalha viram reforço
   sound: params.get('som') !== '0',
-  demo: params.has('demo'),
-  bots: params.has('bots'),
+  demo: params.has('demo') || !!window.BATALHA_DEMO,
+  bots: params.has('bots') || !!window.BATALHA_DEMO,
 };
 const ROSE_IDS = new Set([5655]);
 const isRose = (g) => ROSE_IDS.has(Number(g.giftId)) || /^(rose|rosa)$/i.test(g.giftName || '');
@@ -545,6 +545,7 @@ function handleEvent(ev) {
   else if (ev.type === 'chat') onChat(ev);
 }
 function connectWS() {
+  if (window.BATALHA_DEMO) { connStatus = { connected: false, message: 'Demonstração com bots (sem live)' }; return; }
   if (location.protocol === 'file:') { connStatus = { connected: false, message: 'Aberto como arquivo: só modo demo' }; return; }
   const ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host);
   ws.onmessage = (m) => { try { handleEvent(JSON.parse(m.data)); } catch (e) { console.error(e); } };
@@ -567,7 +568,7 @@ setInterval(() => {
   if (!botsOn) return;
   const t = Math.random() < 0.5 ? 'red' : 'blue';
   const r = Math.random();
-  fakeGift(t, r < 0.85 ? 1 : 5, r > 0.98 ? 30 : 1);
+  if (r > 0.985) fakeGift(t, 1, 30); else fakeGift(t, r < 0.85 ? 1 : 5);
 }, 350);
 
 window.addEventListener('keydown', (e) => {
