@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Batalha TikTok — Vermelho x Azul</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #05060a; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; font-family: system-ui, sans-serif; }
+  canvas { display: block; height: 100vh; max-width: 100vw; aspect-ratio: 9 / 16; object-fit: contain; }
+  #demo { position: fixed; left: 8px; top: 8px; color: #cfd3e0; font: 12px/1.5 monospace; background: rgba(0,0,0,.7); padding: 8px 10px; border-radius: 8px; display: none; }
+  #demo b { color: #fff; }
+</style>
+</head>
+<body>
+<canvas id="game" width="1080" height="1920"></canvas>
+<div id="demo">
+  <b>MODO DEMO</b><br>
+  Q = 🌹 Vermelho &nbsp; P = 🌹 Azul<br>
+  A = 10🌹 Vermelho &nbsp; L = 10🌹 Azul<br>
+  G = Gigante Vermelho &nbsp; H = Gigante Azul<br>
+  B = bots automáticos liga/desliga<br>
+  ESPAÇO = pular fase &nbsp; R = reiniciar
+</div>
+<script src="game.js"></script>
+</body>
+</html>

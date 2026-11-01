@@ -1,0 +1,14 @@
+{
+  "name": "tiktok-batalha",
+  "version": "1.0.0",
+  "description": "Jogo de batalha Vermelho x Azul para TikTok Live: cada Rosa recruta um soldado.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "tiktok-live-connector": "^2.5.0",
+    "ws": "^8.18.0"
+  }
+}
