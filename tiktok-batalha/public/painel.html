@@ -41,6 +41,7 @@
 </style>
 </head>
 <body>
+<script src="config.js"></script>
 <header>
   <div>
     <h1>🌹 Painel de presentes — Batalha das Rosas</h1>
@@ -157,8 +158,7 @@ function ding() {
 }
 
 function connect() {
-  const local = ['localhost', '127.0.0.1'].includes(location.hostname) || /^(192\.168|10\.|172\.)/.test(location.hostname);
-  const ws = new WebSocket(local ? 'ws://' + location.host : 'ws://localhost:8080');
+  const ws = new WebSocket(BRIDGE_WS);
   ws.onmessage = (m) => {
     const ev = JSON.parse(m.data);
     if (ev.type === 'status') {
@@ -180,7 +180,12 @@ function connect() {
 document.querySelectorAll('th[data-k]').forEach((th) => th.addEventListener('click', () => { sortKey = th.dataset.k; render(); }));
 $('q').addEventListener('input', render);
 setInterval(render, 5000);
-if (!['localhost', '127.0.0.1'].includes(location.hostname) && !/^(192\.168|10\.|172\.)/.test(location.hostname)) $('csv').href = 'http://localhost:8080/presentes.csv';
+// Servido pela ponte (PC ou Render): mesmo endereço. Só estático (Netlify): ?ponte=... ou o PC.
+const qp = new URLSearchParams(location.search).get('ponte');
+const BRIDGE_HTTP = qp ? 'https://' + qp.replace(/^(https?|wss?):\/\//, '').replace(/\/$/, '')
+  : window.BATALHA_CFG ? location.origin : 'http://localhost:8080';
+const BRIDGE_WS = BRIDGE_HTTP.replace(/^http/, 'ws');
+$('csv').href = BRIDGE_HTTP + '/presentes.csv';
 connect();
 </script>
 </body>

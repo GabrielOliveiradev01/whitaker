@@ -586,22 +586,29 @@ function handleEvent(ev) {
   else if (ev.type === 'gift') addGift(ev);
   else if (ev.type === 'chat') onChat(ev);
 }
-// Aberto pelo servidor local (localhost): conecta nele mesmo.
-// Aberto pela Netlify (ou outro site): procura a "ponte" rodando no PC em ws://localhost:8080.
+// Onde está a ponte (servidor que recebe os presentes do TikTok):
+//  - ?ponte=wss://... na URL → usa essa
+//  - página servida pela própria ponte (PC ou Render) → mesmo endereço
+//  - página só estática (Netlify) → procura a ponte no PC em ws://localhost:8080
 let socket = null;
 function reportTeam(p) { try { if (socket && socket.readyState === 1) socket.send(JSON.stringify({ type: 'team', id: p.id, team: p.team })); } catch { /* sem servidor */ } }
-const IS_LOCAL = ['localhost', '127.0.0.1', ''].includes(location.hostname);
+const SERVED_BY_BRIDGE = !!window.BATALHA_CFG;
+const IS_LOCAL = SERVED_BY_BRIDGE;
+function bridgeUrl() {
+  const p = params.get('ponte');
+  if (p) return /^wss?:\/\//.test(p) ? p : 'wss://' + p.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  if (SERVED_BY_BRIDGE) return (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
+  return `ws://localhost:${params.get('porta') || 8080}`;
+}
 function connectWS() {
   if (window.BATALHA_DEMO) { connStatus = { connected: false, message: 'Demonstração com bots (sem live)' }; return; }
-  if (location.protocol === 'file:') { connStatus = { connected: false, message: 'Aberto como arquivo: só modo demo' }; return; }
-  const url = IS_LOCAL
-    ? (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host
-    : `ws://localhost:${params.get('porta') || 8080}`;
+  if (location.protocol === 'file:' && !params.get('ponte')) { connStatus = { connected: false, message: 'Aberto como arquivo: só modo demo' }; return; }
+  const url = bridgeUrl();
   let ws;
   try { ws = new WebSocket(url); socket = ws; } catch { setTimeout(connectWS, 3000); return; }
   ws.onmessage = (m) => { try { handleEvent(JSON.parse(m.data)); } catch (e) { console.error(e); } };
   ws.onclose = () => {
-    connStatus = { connected: false, bridge: false, message: IS_LOCAL ? 'Servidor offline — reconectando…' : 'Ponte desligada: abra o iniciar-windows.bat no seu PC' };
+    connStatus = { connected: false, bridge: false, message: SERVED_BY_BRIDGE || params.get('ponte') ? 'Servidor offline — reconectando…' : 'Ponte desligada: abra o iniciar-windows.bat no seu PC' };
     setTimeout(connectWS, 3000);
   };
 }

@@ -238,7 +238,11 @@ server.listen(PORT, () => {
   if (lan) console.log(`   Painel no celular (mesmo Wi-Fi):      http://${lan.address}:${PORT}/painel`);
   console.log(`   Planilha de presentes:                pasta "registros"`);
   console.log('   Para fechar: feche esta janela (ou Ctrl+C)\n');
+  // No Render (plano grátis) o servidor dorme sem acessos: ele mesmo se acessa a cada 10 min
+  if (process.env.RENDER_EXTERNAL_URL) {
+    setInterval(() => fetch(process.env.RENDER_EXTERNAL_URL + '/config.js').catch(() => {}), 10 * 60 * 1000);
+  }
   if (USERNAME) startTikTok();
   else console.log('⚠️  Nenhum usuário configurado. Abra o config.json e coloque seu @ em "usuario_tiktok".\n');
-  if (CFG.abrir_navegador !== false && !process.env.NO_BROWSER) openBrowser(USERNAME ? url : `${url}/?demo=1`);
+  if (CFG.abrir_navegador !== false && !process.env.NO_BROWSER && !process.env.RENDER) openBrowser(USERNAME ? url : `${url}/?demo=1`);
 });
